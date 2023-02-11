@@ -1,0 +1,47 @@
+---
+import type { Blog } from "../types/Blog";
+import Card from "./Card.astro";
+
+export interface Props {
+  blogs: Blog[];
+}
+
+const { blogs } = Astro.props;
+---
+
+<ul
+  role="list"
+  class="grid gap-x-8 gap-y-16 grid-cols-[repeat(auto-fill,minmax(max(300px,calc((100%-4rem)/3)),1fr))] pb-8 -mt-56"
+>
+  {
+    blogs.map((blog) => {
+      const blogAttributes = blog.attributes;
+      const authorAttributes = blogAttributes.author.data.attributes;
+      const authorDisplayPicture =
+        authorAttributes.display_picture.data.attributes;
+      return (
+        <Card
+          title={blogAttributes.title}
+          authorDetails={{
+            fullName: authorAttributes.name,
+            image: {
+              url:
+                authorDisplayPicture.formats.thumbnail?.url ??
+                authorDisplayPicture.url,
+              altText: authorDisplayPicture.alternativeText,
+            },
+          }}
+          category={blogAttributes.categories.data[0]?.attributes?.name}
+          createdAt={blogAttributes.createdAt}
+          description={blogAttributes.description}
+          image={{
+            url: blogAttributes.featured_image.data.attributes.url,
+            altText:
+              blogAttributes.featured_image.data.attributes.alternativeText,
+          }}
+          slug={blogAttributes.slug}
+        />
+      );
+    })
+  }
+</ul>

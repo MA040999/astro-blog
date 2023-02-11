@@ -1,0 +1,122 @@
+---
+import Layout from "../layouts/Layout.astro";
+import type { StrapiResponse } from "../types/StrapiResponse";
+import type { Blog } from "../types/Blog";
+import qs from "qs";
+import BlogList from "../components/BlogList.astro";
+
+const query = qs.stringify(
+  {
+    fields: ["id", "title", "visibility", "description", "slug", "createdAt"],
+    populate: {
+      featured_image: {
+        fields: ["alternativeText", "url"],
+      },
+      author: {
+        fields: ["id", "name"],
+        populate: {
+          display_picture: {
+            fields: ["formats", "alternativeText", "url"],
+          },
+        },
+      },
+      categories: {
+        fields: ["id", "name"],
+      },
+    },
+  },
+  {
+    encodeValuesOnly: true, // prettify URL
+  }
+);
+
+const response = await fetch(
+  `${
+    import.meta.env.STRAPI_SERVER_URL
+  }/api/blogs?pagination[page]=1&pagination[pageSize]=9&sort=createdAt:desc&${query}`
+);
+const data: StrapiResponse<Blog> = await response.json();
+// console.log("🚀 ~ data", data.data[0]);
+console.log("🚀 ~ data", data.data[0].attributes.author);
+---
+
+<style>
+  .polygon-clip-path {
+    clip-path: polygon(0 0, 100% 0, 100% 0%, 0 100%);
+  }
+</style>
+
+<Layout title="Strapi Blog">
+  <main>
+    <section class="relative">
+      <header
+        class="clip-path mx-auto max-w-2xl py-32 sm:py-48 lg:py-56 bg-primary-50 shadow-[0px_0px_0px_100vmax_hsl(var(--primary-50))]"
+      >
+        <div class="mb-4 flex justify-center">
+          <div
+            class="relative rounded-full py-1 px-3 text-sm leading-6 text-primary-700 bg-primary-100"
+          >
+            Our blog
+          </div>
+        </div>
+        <div class="text-center">
+          <h1
+            class="text-4xl font-bold tracking-tight text-primary-900 sm:text-6xl"
+          >
+            Resources and insights
+          </h1>
+          <p class="mt-6 text-lg leading-8 text-primary-700">
+            The latest industry news, interviews, technologies, and resources.
+          </p>
+        </div>
+      </header>
+      <div class="relative">
+        <div
+          class="bg-primary-50 h-44 absolute inset-0 w-full -ml-viewport-inline-padding polygon-clip-path"
+        >
+        </div>
+        <div
+          class="clip-path w-full bg-primary-300 h-14 shadow-[0px_0px_0px_100vmax_hsl(var(--primary-300))] -rotate-[8deg]"
+        >
+        </div>
+        <div
+          class="clip-path w-full bg-primary-200 h-14 shadow-[0px_0px_0px_100vmax_hsl(var(--primary-200))] -rotate-[8deg]"
+        >
+        </div>
+        <div
+          class="clip-path w-full bg-primary-100 h-14 shadow-[0px_0px_0px_100vmax_hsl(var(--primary-100))] -rotate-[8deg]"
+        >
+        </div>
+      </div>
+      <BlogList blogs={data.data} />
+      <div
+        class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
+      >
+        <svg
+          class="relative left-[calc(50%+3rem)] h-[21.1875rem] max-w-none -translate-x-1/2 sm:left-[calc(50%+36rem)] sm:h-[42.375rem]"
+          viewBox="0 0 1155 678"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fill="url(#ecb5b0c9-546c-4772-8c71-4d3f06d544bc)"
+            fill-opacity=".3"
+            d="M317.219 518.975L203.852 678 0 438.341l317.219 80.634 204.172-286.402c1.307 132.337 45.083 346.658 209.733 145.248C936.936 126.058 882.053-94.234 1031.02 41.331c119.18 108.451 130.68 295.337 121.53 375.223L855 299l21.173 362.054-558.954-142.079z"
+          ></path>
+          <defs>
+            <linearGradient
+              id="ecb5b0c9-546c-4772-8c71-4d3f06d544bc"
+              x1="1155.49"
+              x2="-78.208"
+              y1=".177"
+              y2="474.645"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="#9089FC"></stop>
+              <stop offset="1" stop-color="#FF80B5"></stop>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </section>
+  </main>
+</Layout>
