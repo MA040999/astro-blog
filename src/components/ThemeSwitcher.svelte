@@ -27,9 +27,12 @@
   <label
     for="theme-toggle"
     aria-checked={isDarkTheme}
+    aria-labelledby="theme-toggle-label"
     class="inline-flex items-center peer-focus-within:outline peer-focus-within:outline-2 peer-focus-within:outline-offset-2 peer-focus-within:outline-primary-900 justify-between w-full p-2 text-primary-900 rounded-lg cursor-pointer hover:bg-primary-200"
   >
-    <span class="sr-only">Use dark theme</span>
+    <span id="theme-toggle-label" class="sr-only" aria-hidden="true"
+      >Use dark theme</span
+    >
     <!-- sun icon -->
     {#if !isDarkTheme}
       <svg

@@ -1,0 +1,231 @@
+---
+import qs from "qs";
+import Layout from "../../layouts/Layout.astro";
+import type { Blog } from "../../types/Blog";
+import type { StrapiResponse } from "../../types/StrapiResponse";
+import { Image } from "@astrojs/image/components";
+import { marked } from "marked";
+
+export async function getStaticPaths() {
+  const { data }: StrapiResponse<Blog> = await fetch(
+    `${import.meta.env.STRAPI_SERVER_URL}/api/blogs`
+  ).then((res) => res.json());
+
+  return data.map((blog) => ({ params: { slug: blog.attributes.slug } }));
+}
+
+// type fields<
+//   T extends
+//     | { id: number; attributes: Object }
+//     | { data: { id: number; attributes: Object } }
+//     | { data: { id: number; attributes: Object }[] }
+// > = T extends { id: number; attributes: Object }
+//   ? {
+//       fields: (keyof T["attributes"] | "id")[];
+//     }
+//   : T extends { data: { id: number; attributes: Object } }
+//   ? {
+//       fields: (keyof T["data"]["attributes"] | "id")[];
+//     }
+//   : T extends { data: { id?: number; attributes?: infer R }[] }
+//   ? {
+//       fields: (keyof R | "id")[];
+//     }
+//   : never;
+
+// type populate<
+//   T extends
+//     | { id: number; attributes: Object }
+//     | { data: { id: number; attributes: Object } }
+// > = T extends { id: number; attributes: Object }
+//   ? {
+//       populate: Partial<{
+//         [K in keyof T["attributes"]]: Partial<fields<T["attributes"][K]> & populate<T['attributes'][K]>>;
+//       }>;
+//     }
+//   : T extends { data: { id: number; attributes: Object } }
+//   ? {
+//       populate: Partial<{
+//         [K in keyof T["data"]["attributes"]]: Partial<fields<T["data"]> & populate<T['data']>> ;
+//       }>;
+//     }
+//   : [];
+
+// const aa: Partial<fields<Blog> & populate<Blog>> = {
+//   fields: ["id", "title", "visibility", "description", "slug", "createdAt"],
+//   populate: {
+//     featured_image: {
+//       fields: ["alternativeText", "url"],
+//     },
+//     author: {
+//       fields: ["id", "name"],
+
+//       populate: {
+//         display_picture: {
+//           fields: ["formats", "alternativeText", "url"],
+//         },
+//       },
+//     },
+//     categories: {
+//       fields: ["id", 'name'],
+//     },
+//   },
+// };
+
+const query = qs.stringify(
+  {
+    fields: [
+      "id",
+      "title",
+      "visibility",
+      "content",
+      "description",
+      "slug",
+      "createdAt",
+    ],
+    populate: {
+      featured_image: {
+        fields: ["alternativeText", "url"],
+      },
+      author: {
+        fields: ["id", "name", "occupation"],
+        populate: {
+          display_picture: {
+            fields: ["formats", "alternativeText", "url"],
+          },
+        },
+      },
+      categories: {
+        fields: ["id", "name"],
+      },
+    },
+  },
+  {
+    encodeValuesOnly: true, // prettify URL
+  }
+);
+
+const { slug } = Astro.params;
+
+const { data }: StrapiResponse<Blog> = await fetch(
+  `${
+    import.meta.env.STRAPI_SERVER_URL
+  }/api/blogs?filters[slug][$eq]=${slug}&${query}`
+).then((res) => res.json());
+
+const blog = data[0];
+---
+
+<Layout title={blog.attributes.title + " - Strapi Blog"}>
+  <main data-blog={blog}>
+    <article class="relative">
+      <header class="clip-path mx-auto max-w-5xl py-16 sm:py-20 lg:py-24">
+        <div class="mb-4 flex justify-center">
+          <div
+            class="relative rounded-full py-1 px-3 text-sm leading-6 text-primary-700"
+          >
+            Published {
+              new Date(blog.attributes.createdAt).toLocaleDateString(
+                undefined,
+                {
+                  dateStyle: "long",
+                }
+              )
+            }
+          </div>
+        </div>
+        <div class="text-center">
+          <h1
+            class="text-4xl font-bold tracking-tight text-primary-900 sm:text-6xl"
+          >
+            {blog.attributes.title}
+          </h1>
+          <p class="mt-6 text-lg leading-8 text-primary-700">
+            {blog.attributes.description}
+          </p>
+          <ul
+            aria-label="Blog categories"
+            class="flex justify-center items-center flex-wrap mt-8 gap-3"
+          >
+            {
+              blog.attributes.categories.data.map((category) => (
+                <li class="relative rounded-full py-1 px-3 text-sm leading-6 text-primary-700 bg-primary-100">
+                  {category.attributes?.name}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <Image
+          alt={blog.attributes.featured_image.data.attributes.alternativeText ??
+            ""}
+          src={import.meta.env.STRAPI_SERVER_URL +
+            blog.attributes.featured_image.data.attributes.url}
+          width={900}
+          aspectRatio={16 / 9}
+          height={0}
+          class={"rounded-lg mt-16 w-full"}
+        />
+      </header>
+
+      <div
+        class="prose mx-auto prose-violet dark:prose-invert pb-12 border-b"
+        set:html={marked.parse(blog.attributes.content)}
+      />
+
+      <footer class="max-w-[65ch] mx-auto mb-12">
+        <div class="flex gap-3 items-center pt-4">
+          <Image
+            alt={blog.attributes.author.data.attributes.display_picture.data
+              .attributes.alternativeText ?? ""}
+            src={import.meta.env.STRAPI_SERVER_URL +
+              blog.attributes.author.data.attributes.display_picture.data
+                .attributes.url}
+            width={40}
+            aspectRatio={1 / 1}
+            height={0}
+            class={"rounded-full"}
+          />
+          <div class="flex flex-col">
+            <small class="text-sm font-semibold text-primary-900"
+              >{blog.attributes.author.data.attributes.name}</small
+            >
+            <small class="text-sm font-light text-gray-500"
+              >{blog.attributes.author.data.attributes.occupation}</small
+            >
+          </div>
+        </div>
+      </footer>
+
+      <div
+        class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
+      >
+        <svg
+          aria-hidden="true"
+          class="relative left-[calc(50%+3rem)] h-[21.1875rem] max-w-none -translate-x-1/2 sm:left-[calc(50%+36rem)] sm:h-[42.375rem]"
+          viewBox="0 0 1155 678"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fill="url(#ecb5b0c9-546c-4772-8c71-4d3f06d544bc)"
+            fill-opacity=".3"
+            d="M317.219 518.975L203.852 678 0 438.341l317.219 80.634 204.172-286.402c1.307 132.337 45.083 346.658 209.733 145.248C936.936 126.058 882.053-94.234 1031.02 41.331c119.18 108.451 130.68 295.337 121.53 375.223L855 299l21.173 362.054-558.954-142.079z"
+          ></path>
+          <defs>
+            <linearGradient
+              id="ecb5b0c9-546c-4772-8c71-4d3f06d544bc"
+              x1="1155.49"
+              x2="-78.208"
+              y1=".177"
+              y2="474.645"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="#9089FC"></stop>
+              <stop offset="1" stop-color="#FF80B5"></stop>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </article>
+  </main>
+</Layout>

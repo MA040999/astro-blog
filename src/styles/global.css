@@ -15,6 +15,7 @@
   --primary-700: 263 70% 50%;
   --primary-800: 263 69% 42%;
   --primary-900: 264 67% 35%;
+  --quote-border: hsl(var(--primary-500));
 }
 
 .dark {
@@ -27,7 +28,7 @@
   --primary-300: 262 83% 58%;
   --primary-200: 263 70% 50%;
   --primary-100: 263 69% 42%;
-  --primary-50: 264 67% 35%;
+  --primary-50: 265 50% 25%;
 }
 
 @layer utilities {

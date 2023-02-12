@@ -22,7 +22,21 @@ module.exports = {
         "primary-800": "hsl(var(--primary-800) / <alpha-value>)",
         "primary-900": "hsl(var(--primary-900) / <alpha-value>)",
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            "--tw-prose-quote-borders": "var(--quote-border)",
+            "--tw-prose-invert-quote-borders": "var(--quote-border)",
+            "blockquote p::after": {
+              display: "none",
+            },
+            "blockquote p::before": {
+              display: "none",
+            },
+          },
+        },
+      },
     },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/typography")],
 };
