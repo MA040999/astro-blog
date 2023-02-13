@@ -58,7 +58,7 @@ const { image, title, authorDetails, category, createdAt, description, slug } =
     <div class="mt-auto flex gap-3 items-center pt-8">
       <Image
         alt={authorDetails.image.altText ?? ""}
-        src={import.meta.env.STRAPI_SERVER_URL + authorDetails.image.url}
+        src={authorDetails.image.url}
         width={40}
         aspectRatio={1 / 1}
         height={0}
@@ -80,7 +80,7 @@ const { image, title, authorDetails, category, createdAt, description, slug } =
   </div>
   <Image
     alt={image.altText ?? ""}
-    src={import.meta.env.STRAPI_SERVER_URL + image.url}
+    src={image.url}
     width={300}
     aspectRatio={16 / 9}
     height={0}

@@ -159,8 +159,7 @@ const blog = data[0];
         <Image
           alt={blog.attributes.featured_image.data.attributes.alternativeText ??
             ""}
-          src={import.meta.env.STRAPI_SERVER_URL +
-            blog.attributes.featured_image.data.attributes.url}
+          src={blog.attributes.featured_image.data.attributes.url}
           width={900}
           aspectRatio={16 / 9}
           height={0}
@@ -178,9 +177,8 @@ const blog = data[0];
           <Image
             alt={blog.attributes.author.data.attributes.display_picture.data
               .attributes.alternativeText ?? ""}
-            src={import.meta.env.STRAPI_SERVER_URL +
-              blog.attributes.author.data.attributes.display_picture.data
-                .attributes.url}
+            src={blog.attributes.author.data.attributes.display_picture.data
+              .attributes.url}
             width={40}
             aspectRatio={1 / 1}
             height={0}

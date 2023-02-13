@@ -37,7 +37,11 @@ const response = await fetch(
 );
 const data: StrapiResponse<Blog> = await response.json();
 // console.log("🚀 ~ data", data.data[0]);
-console.log("🚀 ~ data", data.data[0].attributes.author);
+console.log(
+  "🚀 ~ data",
+  data.data[0].attributes.author.data.attributes.display_picture.data.attributes
+    .formats
+);
 ---
 
 <style>
